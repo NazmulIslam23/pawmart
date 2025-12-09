@@ -1,165 +1,60 @@
-const pool = require("../config/db"); // ensure this uses mysql2/promise
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import pool from "../config/db.js";
 
-const ACCESS_SECRET = "purewave_access_secret";   // short-lived token
-const REFRESH_SECRET = "purewave_refresh_secret"; // long-lived token
+export const signup = async (req, res) => {
+    try {
+        const { name, email, password, phone } = req.body;
 
-// Generate Access Token
-const generateAccessToken = (user) => {
-  return jwt.sign(
-    { user_id: user.user_id, email: user.email },
-    ACCESS_SECRET,
-    { expiresIn: "15m" }
-  );
-};
+        const [exists] = await pool.query(
+            "SELECT * FROM users WHERE email = ?", [email]
+        );
 
-// Generate Refresh Token
-const generateRefreshToken = (user) => {
-  return jwt.sign(
-    { user_id: user.user_id, email: user.email },
-    REFRESH_SECRET,
-    { expiresIn: "7d" }
-  );
-};
+        if (exists.length > 0)
+            return res.status(400).json({ message: "Email already in use" });
 
-// Signup
-exports.signup = async (req, res) => {
-  const { fullname, email, phone, password } = req.body;
+        const hash = await bcrypt.hash(password, 10);
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query(
+            "INSERT INTO users (name, email, password_hash, phone) VALUES (?, ?, ?, ?)",
+            [name, email, hash, phone]
+        );
 
-    const [result] = await pool.execute(
-      `INSERT INTO users (name, email, phone, password_hash)
-       VALUES (?, ?, ?, ?)`,
-      [fullname || "Unknown", email, phone, hashedPassword]
-    );
+        res.json({ message: "User registered successfully" });
 
-    const user = { user_id: result.insertId, email };
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    await pool.execute(
-      "INSERT INTO refresh_tokens (user_id, token) VALUES (?, ?)",
-      [user.user_id, refreshToken]
-    );
-
-    res.json({
-      success: true,
-      message: "User registered successfully",
-      accessToken,
-      refreshToken
-    });
-  } catch (err) {
-    console.error("Signup error:", err);
-    if (err.code === "ER_DUP_ENTRY") {
-      return res.json({ success: false, message: "Email already exists" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
 };
 
-// Login
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  console.log("Login attempt for:", email);
 
-  try {
-    const [rows] = await pool.execute(
-      "SELECT user_id, name, email, phone, password_hash, created_at FROM users WHERE email = ?",
-      [email]
-    );
+export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
 
-    if (!Array.isArray(rows) || rows.length === 0) {
-      return res.json({ success: false, message: "User not found" });
+        const [rows] = await pool.query(
+            "SELECT * FROM users WHERE email = ?", [email]
+        );
+
+        if (rows.length === 0)
+            return res.status(400).json({ message: "Invalid email" });
+
+        const user = rows[0];
+
+        const match = await bcrypt.compare(password, user.password_hash);
+
+        if (!match)
+            return res.status(400).json({ message: "Invalid password" });
+
+        const token = jwt.sign(
+            { user_id: user.user_id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRY }
+        );
+
+        res.json({ token, user });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    const user = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    if (!isPasswordValid) {
-      return res.json({ success: false, message: "Incorrect password" });
-    }
-
-    const safeName = user.name || "Unknown";
-
-    // Insert login record
-    await pool.execute(
-      "INSERT INTO user_logins (user_id, user_name, ip_address, user_agent) VALUES (?, ?, ?, ?)",
-      [user.user_id, safeName, req.ip, req.get("User-Agent")]
-    );
-
-    // Update last_login
-    await pool.execute(
-      "UPDATE users SET last_login = NOW() WHERE user_id = ?",
-      [user.user_id]
-    );
-
-    const userData = { user_id: user.user_id, email: user.email };
-    const accessToken = generateAccessToken(userData);
-    const refreshToken = generateRefreshToken(userData);
-
-    await pool.execute(
-      "INSERT INTO refresh_tokens (user_id, token) VALUES (?, ?)",
-      [user.user_id, refreshToken]
-    );
-
-    res.json({
-      success: true,
-      message: "Login successful",
-      accessToken,
-      refreshToken,
-      user: {
-        user_id: user.user_id,
-        name: safeName,
-        email: user.email,
-        phone: user.phone,
-        created_at: user.created_at
-      }
-    });
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-// Refresh token
-exports.refreshToken = async (req, res) => {
-  const { token } = req.body;
-  if (!token) return res.status(401).json({ success: false, message: "Refresh token missing" });
-
-  try {
-    const [rows] = await pool.execute(
-      "SELECT * FROM refresh_tokens WHERE token = ?",
-      [token]
-    );
-
-    if (!Array.isArray(rows) || rows.length === 0) {
-      return res.status(403).json({ success: false, message: "Invalid refresh token" });
-    }
-
-    jwt.verify(token, REFRESH_SECRET, (err, user) => {
-      if (err) return res.status(403).json({ success: false, message: "Invalid refresh token" });
-
-      const accessToken = generateAccessToken({ user_id: user.user_id, email: user.email });
-      res.json({ success: true, accessToken });
-    });
-  } catch (err) {
-    console.error("Refresh token error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-// Logout
-exports.logout = async (req, res) => {
-  const { token } = req.body;
-  if (!token) return res.status(400).json({ success: false, message: "Token missing" });
-
-  try {
-    await pool.execute("DELETE FROM refresh_tokens WHERE token = ?", [token]);
-    res.json({ success: true, message: "Logged out successfully" });
-  } catch (err) {
-    console.error("Logout error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
 };

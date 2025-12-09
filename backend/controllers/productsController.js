@@ -1,46 +1,37 @@
-const pool = require("../config/db");
+import pool from "../config/db.js";
 
-exports.getAllProducts = async (req, res) => {
-  const categoryId = req.query.category_id;
+export const getAllProducts = async (req, res) => {
+    try {
+        const [products] = await pool.query(`
+            SELECT p.*, i.image_url
+            FROM products p
+            LEFT JOIN images i ON p.product_id = i.product_id
+            GROUP BY p.product_id
+            ORDER BY p.product_id ASC
+        `);
 
-  try {
-    let query = `
-      SELECT product_id, name, price, description, category_id
-      FROM products
-    `;
-    const params = [];
-    if (categoryId) {
-      query += " WHERE category_id = ?";
-      params.push(categoryId);
+        res.json(products);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    query += " ORDER BY product_id ASC";
+};
 
-    const [productsRows] = await pool.execute(query, params);
 
-    const productIds = productsRows.map(p => p.product_id);
-    let imagesMap = {};
+export const getProductById = async (req, res) => {
+    try {
+        const id = req.params.id;
 
-    if (productIds.length) {
-      const [imagesRows] = await pool.query(
-        `SELECT product_id, image_url FROM images WHERE product_id IN (?)`,
-        [productIds]
-      );
+        const [rows] = await pool.query(`
+            SELECT p.*, i.image_url
+            FROM products p
+            LEFT JOIN images i ON p.product_id = i.product_id
+            WHERE p.product_id = ?
+        `, [id]);
 
-      imagesRows.forEach(img => {
-        if (!imagesMap[img.product_id]) imagesMap[img.product_id] = [];
-        // Prepend /Products/ to the image filename
-        imagesMap[img.product_id].push(`${img.image_url}`);
-      });
+        res.json(rows);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    const products = productsRows.map(p => ({
-      ...p,
-      images: imagesMap[p.product_id] || [`https://purewave.onrender.com/default.jpg`]
-    }));
-
-    res.json({ success: true, products });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Failed to fetch products" });
-  }
 };

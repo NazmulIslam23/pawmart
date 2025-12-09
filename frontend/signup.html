@@ -8,12 +8,7 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
 
     body {
         background: #f7f7f7;
@@ -71,7 +66,7 @@
         font-size: 16px;
     }
 
-    .signup-form .btn-signup {
+    .btn-signup {
         width: 100%;
         padding: 14px;
         background: #ff6b00;
@@ -83,58 +78,73 @@
         transition: 0.3s;
     }
 
-    .signup-form .btn-signup:hover {
+    .btn-signup:hover {
         background: #e45d00;
     }
 
-    .signup-form .login-link {
+    .login-link {
         margin-top: 15px;
         text-align: center;
         font-size: 14px;
     }
 
-    .signup-form .login-link a {
+    .login-link a {
         color: #ff6b00;
         text-decoration: none;
-        transition: 0.3s;
     }
 
-    .signup-form .login-link a:hover {
-        text-decoration: underline;
+    /* Error message */
+    .error-msg {
+        background: #ffdddd;
+        color: #c70000;
+        padding: 10px;
+        border-left: 4px solid #c70000;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        display: none;
+    }
+
+    .success-msg {
+        background: #ddffdd;
+        color: #008000;
+        padding: 10px;
+        border-left: 4px solid #008000;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        display: none;
     }
 
     @media(max-width: 768px) {
-        .signup-container {
-            flex-direction: column;
-        }
-        .signup-image {
-            height: 200px;
-        }
+        .signup-container { flex-direction: column; }
+        .signup-image { height: 200px; }
     }
 </style>
 </head>
 <body>
 
 <div class="signup-container">
-    <!-- Left Image -->
+
     <div class="signup-image"></div>
 
-    <!-- Signup Form -->
     <div class="signup-form">
         <h2>Create Your Account</h2>
 
-        <form action="cart.html" method="GET">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" placeholder="Your full name" required>
+        <div id="error" class="error-msg"></div>
+        <div id="success" class="success-msg"></div>
 
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="example@gmail.com" required>
+        <form id="signupForm">
 
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="********" required>
+            <label>Full Name</label>
+            <input type="text" id="name" required>
 
-            <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" placeholder="********" required>
+            <label>Email</label>
+            <input type="email" id="email" required>
+
+            <label>Password</label>
+            <input type="password" id="password" required>
+
+            <label>Confirm Password</label>
+            <input type="password" id="confirm-password" required>
 
             <button type="submit" class="btn-signup">Sign Up</button>
 
@@ -144,6 +154,72 @@
         </form>
     </div>
 </div>
+
+
+<script>
+// =========================
+// Backend API URL
+// =========================
+const API_URL = "http://localhost:5000/api/auth/signup";
+
+// =========================
+// Form Handler
+// =========================
+document.getElementById("signupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const errorBox = document.getElementById("error");
+    const successBox = document.getElementById("success");
+
+    errorBox.style.display = "none";
+    successBox.style.display = "none";
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+    const confirmPass = document.getElementById("confirm-password").value;
+
+    // Password match validation
+    if (pass !== confirmPass) {
+        errorBox.innerText = "Passwords do not match!";
+        errorBox.style.display = "block";
+        return;
+    }
+
+    // Create user
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: pass,
+                phone: "N/A"
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorBox.innerText = data.message || "Signup failed!";
+            errorBox.style.display = "block";
+            return;
+        }
+
+        successBox.innerText = "Signup successful! Redirecting...";
+        successBox.style.display = "block";
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+
+    } catch (err) {
+        errorBox.innerText = "Server error: " + err.message;
+        errorBox.style.display = "block";
+    }
+});
+</script>
 
 </body>
 </html>
