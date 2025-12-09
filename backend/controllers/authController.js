@@ -1,64 +1,45 @@
-// backend/controllers/authController.js
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import pool from "../config/db.js";
-
-export const signup = async (req, res) => {
-    try {
-        const { name, email, password, phone } = req.body;
-
-        const [exists] = await pool.query(
-            "SELECT * FROM users WHERE email = ?", [email]
-        );
-
-        if (exists.length > 0)
-            return res.status(400).json({ message: "Email already in use" });
-
-        const hash = await bcrypt.hash(password, 10);
-
-        await pool.query(
-            "INSERT INTO users (name, email, password_hash, phone) VALUES (?, ?, ?, ?)",
-            [name, email, hash, phone]
-        );
-
-        res.json({ message: "User registered successfully" });
-
-    } catch (error) {
-        console.error("Signup error:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
+import pool from '../config/db.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     try {
-        console.log("Login request body:", req.body); // log input
-        const { email, password } = req.body;
+        // Check if user exists
+        const userQuery = 'SELECT * FROM users WHERE email=$1';
+        const userResult = await pool.query(userQuery, [email]);
 
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE email = ?", [email]
-        );
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-        if (rows.length === 0)
-            return res.status(400).json({ message: "Invalid email" });
+        const user = userResult.rows[0];
 
-        const user = rows[0];
-        const match = await bcrypt.compare(password, user.password_hash);
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-        console.log("Password match:", match);
-
-        if (!match)
-            return res.status(400).json({ message: "Invalid password" });
-
+        // Create JWT token
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email },
+            { user_id: user.user_id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRY }
+            { expiresIn: process.env.JWT_EXPIRES_IN }
         );
+
+        // Optional: remove sensitive info
+        delete user.password_hash;
 
         res.json({ token, user });
 
-    } catch (error) {
-        console.error("Login error:", error);
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
     }
 };
