@@ -1,48 +1,45 @@
-import { pool } from "../config/db.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import pool from '../config/db.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
 
-    try {
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE email = ?",
-            [email]
-        );
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
 
-        if (rows.length === 0) {
-            return res.status(401).json({ message: "Invalid email or password" });
+    try {
+        // Check if user exists
+        const userQuery = 'SELECT * FROM users WHERE email=$1';
+        const userResult = await pool.query(userQuery, [email]);
+
+        if (userResult.rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const user = rows[0];
+        const user = userResult.rows[0];
 
-        // Compare hashed password
+        // Verify password
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid email or password" });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Generate JWT token
+        // Create JWT token
         const token = jwt.sign(
             { user_id: user.user_id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: "7d" }
+            { expiresIn: process.env.JWT_EXPIRES_IN }
         );
 
-        // Send user info & token
-        res.json({
-            token,
-            user: {
-                id: user.user_id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
-        });
+        // Optional: remove sensitive info
+        delete user.password_hash;
+
+        res.json({ token, user });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: 'Server error' });
     }
 };
