@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PawMart - Checkout</title>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: #f7f6f6;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 7px rgba(0,0,0,.1);
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ff6b00;
+        }
+
+        .nav-icons span {
+            cursor: pointer;
+            font-size: 28px;
+        }
+
+        /* MAIN CHECKOUT WRAPPER */
+        .checkout-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: 2fr 1.3fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,.1);
+        }
+
+        .section-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        label {
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .delivery-options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+
+        .order-summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .total {
+            font-size: 22px;
+            font-weight: 700;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: #ff6b00;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 8px;
+        }
+
+        .btn-checkout:hover {
+            background: #e45d00;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,.2);
+            text-align: center;
+            width: 300px;
+            transition: 0.3s ease;
+            z-index: 999;
+        }
+
+        .popup.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        @media (max-width: 900px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">PawMart</div>
+            <div class="nav-icons">
+                <a href="cart.html"><span class="material-icons">shopping_cart</span></a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CHECKOUT MAIN -->
+    <div class="checkout-container">
+
+        <!-- BILLING DETAILS -->
+        <div class="card">
+            <h2 class="section-title">Billing Details</h2>
+
+            <label>Full Name</label>
+            <input id="name" type="text" placeholder="Your full name">
+
+            <label>Phone Number</label>
+            <input id="phone" type="text" placeholder="017********">
+
+            <label>Email</label>
+            <input id="email" type="email" placeholder="example@gmail.com">
+
+            <label>Address</label>
+            <textarea id="address" rows="3" placeholder="House, Road, Area"></textarea>
+
+            <label>City</label>
+            <select id="city">
+                <option>Dhaka</option>
+                <option>Chittagong</option>
+                <option>Sylhet</option>
+                <option>Rajshahi</option>
+                <option>Khulna</option>
+                <option>Barisal</option>
+                <option>Rangpur</option>
+                <option>Mymensingh</option>
+            </select>
+
+            <label>Delivery Method</label>
+            <div class="delivery-options">
+                <label><input type="radio" name="delivery" value="60" checked> Inside Dhaka - ৳60</label>
+                <label><input type="radio" name="delivery" value="120"> Outside Dhaka - ৳120</label>
+            </div>
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="card">
+            <h2 class="section-title">Order Summary</h2>
+
+            <div class="order-summary-item">
+                <span>Subtotal</span>
+                <span id="subtotal">৳ 0</span>
+            </div>
+
+            <div class="order-summary-item">
+                <span>Delivery Charge</span>
+                <span id="delivery">৳ 60</span>
+            </div>
+
+            <div class="order-summary-item total">
+                <span>Total</span>
+                <span id="total">৳ 60</span>
+            </div>
+
+            <button class="btn-checkout" id="confirmBtn">Confirm Order</button>
+        </div>
+
+    </div>
+
+    <!-- SUCCESS POPUP -->
+    <div class="popup" id="popup">
+        <h2>Order Confirmed!</h2>
+        <p>Your order has been placed successfully.</p>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Load subtotal from cart (localStorage)
+        let subtotal = localStorage.getItem("cart_total") 
+            ? Number(localStorage.getItem("cart_total")) 
+            : 0;
+
+        document.getElementById("subtotal").innerText = "৳ " + subtotal;
+
+        // Delivery update
+        const radios = document.querySelectorAll("input[name='delivery']");
+        radios.forEach(radio => {
+            radio.addEventListener("change", updateTotal);
+        });
+
+        function updateTotal() {
+            let delivery = Number(document.querySelector("input[name='delivery']:checked").value);
+            let finalTotal = subtotal + delivery;
+
+            document.getElementById("delivery").innerText = "৳ " + delivery;
+            document.getElementById("total").innerText = "৳ " + finalTotal;
+        }
+
+        updateTotal(); // initial load
+
+        // Confirm Order
+        document.getElementById("confirmBtn").addEventListener("click", () => {
+
+            // Validation
+            let name = document.getElementById("name").value.trim();
+            let phone = document.getElementById("phone").value.trim();
+            let address = document.getElementById("address").value.trim();
+
+            if (name === "" || phone === "" || address === "") {
+                alert("Please fill all required fields.");
+                return;
+            }
+
+            // Show popup
+            document.getElementById("popup").classList.add("active");
+
+            // Clear cart
+            localStorage.removeItem("cart_items");
+            localStorage.removeItem("cart_total");
+
+            // Redirect after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = "ordersuccess.html";
+            }, 1500);
+        });
+    </script>
+
+</body>
+</html>

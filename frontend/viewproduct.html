@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawMart - Product Details</title>
+
+<!-- Google Fonts & Material Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background: #f7f6f6;
+}
+
+/* NAVBAR */
+.navbar {
+    background: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 3px 7px rgba(0,0,0,.1);
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ff6b00;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-size: 18px;
+    color: #333;
+}
+
+.nav-links a:hover {
+    color: #ff6b00;
+}
+
+.nav-icons span {
+    cursor: pointer;
+    font-size: 28px;
+}
+
+/* PRODUCT DETAILS */
+.product-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,.1);
+}
+
+.product-image img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.product-details h2 {
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+.product-details p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.price {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ff5e00;
+    margin-bottom: 20px;
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.quantity input {
+    width: 60px;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.btn-add {
+    padding: 14px 25px;
+    background: #ff6b00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.btn-add:hover {
+    background: #e45d00;
+}
+
+@media(max-width: 900px) {
+    .product-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header>
+<nav class="navbar">
+    <div class="logo">PawMart</div>
+
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="food.html">Food</a></li>
+        <li><a href="toys.html">Toys</a></li>
+        <li><a href="healthcare.html">Healthcare</a></li>
+        <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-icons">
+        <a href="cart.html"><span class="material-icons">shopping_cart</span></a>
+    </div>
+</nav>
+</header>
+
+<!-- PRODUCT DETAILS -->
+<div class="product-container">
+    <div class="product-image">
+        <img id="productImg" src="images/products/1.webp" alt="Product">
+    </div>
+
+    <div class="product-details">
+        <h2 id="productName">Product Name</h2>
+        <p id="productDesc">This is a detailed description of the product. It includes benefits, usage, and features of the product to help customers make an informed decision.</p>
+        <div class="price" id="productPrice">৳ 500</div>
+
+        <div class="quantity">
+            <label for="qty">Quantity:</label>
+            <input type="number" id="qty" value="1" min="1">
+        </div>
+
+        <button class="btn-add" onclick="addToCart()">Add to Cart</button>
+    </div>
+</div>
+
+<script>
+// Example function to handle adding to cart
+function addToCart() {
+    const name = document.getElementById('productName').innerText;
+    const price = document.getElementById('productPrice').innerText;
+    const quantity = document.getElementById('qty').value;
+    alert(`${quantity} x ${name} added to cart! Total: ${price}`);
+}
+
+// Optional: You can dynamically get query params to show specific products
+// Example: view-product.html?id=5
+const params = new URLSearchParams(window.location.search);
+const productId = params.get('id');
+if(productId) {
+    document.getElementById('productImg').src = `images/products/${productId}.webp`;
+    document.getElementById('productName').innerText = `Product ${productId}`;
+    document.getElementById('productPrice').innerText = `৳ ${100 + productId*25}`;
+    document.getElementById('productDesc').innerText = `This is the description for Product ${productId}. It has amazing features and quality for your pet.`;
+}
+</script>
+
+</body>
+</html>

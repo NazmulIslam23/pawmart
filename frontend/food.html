@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawMart - Food</title>
+
+<!-- Google Fonts & Material Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+body { background: #fafafa; }
+
+/* NAVBAR */
+.navbar { background: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 7px rgba(0,0,0,.1); }
+.logo { font-size: 26px; font-weight: 700; color: #ff6b00; }
+.nav-links { display: flex; gap: 20px; list-style: none; }
+.nav-links a { text-decoration: none; font-size: 18px; color: #333; }
+.nav-links a:hover, .nav-links .active { color: #ff6b00; font-weight: 600; }
+.nav-icons a span { color: #333; font-size: 28px; }
+
+/* PAGE TITLE */
+.page-header { padding: 40px; text-align: center; font-size: 32px; font-weight: 600; }
+
+/* SEARCH + FILTER */
+.top-controls { display: flex; justify-content: space-between; padding: 20px 40px; flex-wrap: wrap; }
+.search-box input { padding: 10px 15px; width: 250px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+.filter-buttons button { padding: 10px 18px; border: none; background: #eee; margin-left: 10px; border-radius: 8px; cursor: pointer; }
+.filter-buttons button:hover { background: #ddd; }
+
+/* PRODUCT GRID */
+.product-grid { padding: 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+.product-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,.1); transition: 0.3s; }
+.product-card img { width: 100%; height: 230px; object-fit: cover; border-radius: 10px; }
+.product-card:hover { transform: translateY(-5px); }
+.product-card a { text-decoration: none; color: #333; }
+.product-card h3 { margin-top: 10px; }
+.price { color: #ff5e00; font-size: 20px; font-weight: bold; margin: 8px 0; }
+.product-card button { width: 100%; padding: 10px; background: #ff6b00; color: white; border: none; border-radius: 8px; cursor: pointer; }
+.product-card button:hover { background: #e45d00; }
+
+/* FOOTER */
+footer { text-align: center; padding: 20px; background: #222; color: white; margin-top: 40px; }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header>
+<nav class="navbar">
+    <div class="logo">PawMart</div>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a class="active" href="food.html">Food</a></li>
+        <li><a href="toys.html">Toys</a></li>
+        <li><a href="healthcare.html">Healthcare</a></li>
+        <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-icons">
+        <a href="cart.html"><span class="material-icons">shopping_cart</span></a>
+    </div>
+</nav>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">Pet Food Collection</div>
+
+<!-- SEARCH & FILTER -->
+<div class="top-controls">
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Search food...">
+    </div>
+
+    <div class="filter-buttons">
+        <button onclick="sortLow()">Price: Low → High</button>
+        <button onclick="sortHigh()">Price: High → Low</button>
+    </div>
+</div>
+
+<!-- PRODUCT GRID -->
+<div class="product-grid" id="productGrid"></div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2025 PawMart — All Rights Reserved</p>
+</footer>
+
+<script>
+// Products array
+let products = [];
+for (let i = 1; i <= 20; i++) {
+    products.push({
+        id: i,
+        name: "Premium Pet Food " + i,
+        price: 150 + i * 20,
+        image: `images/food/${i}.webp`
+    });
+}
+
+// Render products
+function displayProducts(items) {
+    let container = document.getElementById("productGrid");
+    container.innerHTML = "";
+    items.forEach(p => {
+        container.innerHTML += `
+            <div class="product-card">
+                <a href="viewproduct.html?id=${p.id}">
+                    <img src="${p.image}" alt="${p.name}">
+                    <h3>${p.name}</h3>
+                </a>
+                <p class="price">৳ ${p.price}</p>
+                <button>Add to Cart</button>
+            </div>
+        `;
+    });
+}
+
+displayProducts(products);
+
+// -- Search --
+document.getElementById("search").addEventListener("input", function () {
+    let text = this.value.toLowerCase();
+    let filtered = products.filter(p => p.name.toLowerCase().includes(text));
+    displayProducts(filtered);
+});
+
+// -- Sorting --
+function sortLow() {
+    let sorted = [...products].sort((a, b) => a.price - b.price);
+    displayProducts(sorted);
+}
+
+function sortHigh() {
+    let sorted = [...products].sort((a, b) => b.price - a.price);
+    displayProducts(sorted);
+}
+</script>
+
+</body>
+</html>
