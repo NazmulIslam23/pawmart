@@ -8,124 +8,93 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
-
-    body {
-        background: #f7f7f7;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .signup-container {
-        background: #fff;
-        border-radius: 15px;
-        display: flex;
-        max-width: 900px;
-        width: 100%;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        overflow: hidden;
-        flex-wrap: wrap;
-    }
-
-    .signup-image {
-        flex: 1;
-        min-width: 250px;
-        background: url('images/hero-dog.png') center/cover no-repeat;
-    }
-
-    .signup-form {
-        flex: 1;
-        padding: 40px 30px;
-        min-width: 300px;
-    }
-
-    .signup-form h2 {
-        font-size: 28px;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .signup-form label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        color: #555;
-    }
-
-    .signup-form input[type="text"],
-    .signup-form input[type="email"],
-    .signup-form input[type="password"] {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 16px;
-    }
-
-    .btn-signup {
-        width: 100%;
-        padding: 14px;
-        background: #ff6b00;
-        color: white;
-        border: none;
-        font-size: 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .btn-signup:hover {
-        background: #e45d00;
-    }
-
-    .login-link {
-        margin-top: 15px;
-        text-align: center;
-        font-size: 14px;
-    }
-
-    .login-link a {
-        color: #ff6b00;
-        text-decoration: none;
-    }
-
-    /* Error message */
-    .error-msg {
-        background: #ffdddd;
-        color: #c70000;
-        padding: 10px;
-        border-left: 4px solid #c70000;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        display: none;
-    }
-
-    .success-msg {
-        background: #ddffdd;
-        color: #008000;
-        padding: 10px;
-        border-left: 4px solid #008000;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        display: none;
-    }
-
-    @media(max-width: 768px) {
-        .signup-container { flex-direction: column; }
-        .signup-image { height: 200px; }
-    }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+body {
+    background: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+.signup-container {
+    background: #fff;
+    border-radius: 15px;
+    display: flex;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    flex-wrap: wrap;
+}
+.signup-image {
+    flex: 1;
+    min-width: 250px;
+    background: url('images/hero-dog.png') center/cover no-repeat;
+}
+.signup-form {
+    flex: 1;
+    padding: 40px 30px;
+    min-width: 300px;
+}
+.signup-form h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+.signup-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+.signup-form input[type="text"],
+.signup-form input[type="email"],
+.signup-form input[type="password"],
+.signup-form input[type="tel"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.btn-signup {
+    width: 100%;
+    padding: 14px;
+    background: #ff6b00;
+    color: white;
+    border: none;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-signup:hover { background: #e45d00; }
+.login-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+.login-link a { color: #ff6b00; text-decoration: none; }
+.error-msg, .success-msg {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: none;
+}
+.error-msg { background: #ffdddd; color: #c70000; border-left: 4px solid #c70000; }
+.success-msg { background: #ddffdd; color: #008000; border-left: 4px solid #008000; }
+@media(max-width: 768px) {
+    .signup-container { flex-direction: column; }
+    .signup-image { height: 200px; }
+}
 </style>
 </head>
 <body>
 
 <div class="signup-container">
-
     <div class="signup-image"></div>
-
     <div class="signup-form">
         <h2>Create Your Account</h2>
 
@@ -133,12 +102,14 @@
         <div id="success" class="success-msg"></div>
 
         <form id="signupForm">
-
             <label>Full Name</label>
             <input type="text" id="name" required>
 
             <label>Email</label>
             <input type="email" id="email" required>
+
+            <label>Phone</label>
+            <input type="tel" id="phone" placeholder="Optional">
 
             <label>Password</label>
             <input type="password" id="password" required>
@@ -155,12 +126,11 @@
     </div>
 </div>
 
-
 <script>
 // =========================
 // Backend API URL
 // =========================
-const API_URL = "http://localhost:5000/api/auth/signup";
+const API_URL = "https://pawmart-2.onrender.com/api/auth/signup";
 
 // =========================
 // Form Handler
@@ -176,27 +146,21 @@ document.getElementById("signupForm").addEventListener("submit", async function(
 
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
-    const pass = document.getElementById("password").value;
-    const confirmPass = document.getElementById("confirm-password").value;
+    const phone = document.getElementById("phone").value.trim() || "N/A";
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
 
-    // Password match validation
-    if (pass !== confirmPass) {
+    if (password !== confirmPassword) {
         errorBox.innerText = "Passwords do not match!";
         errorBox.style.display = "block";
         return;
     }
 
-    // Create user
     try {
         const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: name,
-                email: email,
-                password: pass,
-                phone: "N/A"
-            })
+            body: JSON.stringify({ name, email, password, phone })
         });
 
         const data = await res.json();
@@ -207,12 +171,10 @@ document.getElementById("signupForm").addEventListener("submit", async function(
             return;
         }
 
-        successBox.innerText = "Signup successful! Redirecting...";
+        successBox.innerText = "Signup successful! Redirecting to login...";
         successBox.style.display = "block";
 
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1500);
+        setTimeout(() => window.location.href = "login.html", 1500);
 
     } catch (err) {
         errorBox.innerText = "Server error: " + err.message;
