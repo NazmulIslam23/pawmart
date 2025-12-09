@@ -1,3 +1,4 @@
+// backend/controllers/authController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
@@ -23,13 +24,14 @@ export const signup = async (req, res) => {
         res.json({ message: "User registered successfully" });
 
     } catch (error) {
+        console.error("Signup error:", error);
         res.status(500).json({ error: error.message });
     }
 };
 
-
 export const login = async (req, res) => {
     try {
+        console.log("Login request body:", req.body); // log input
         const { email, password } = req.body;
 
         const [rows] = await pool.query(
@@ -40,8 +42,9 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid email" });
 
         const user = rows[0];
-
         const match = await bcrypt.compare(password, user.password_hash);
+
+        console.log("Password match:", match);
 
         if (!match)
             return res.status(400).json({ message: "Invalid password" });
@@ -55,6 +58,7 @@ export const login = async (req, res) => {
         res.json({ token, user });
 
     } catch (error) {
+        console.error("Login error:", error);
         res.status(500).json({ error: error.message });
     }
 };
